@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import { normalize, hintFor, reviewDate, buildLesson } from '../src/lib/tutor.ts';
+assert.equal(normalize('  Ice   Cream '), 'ice cream');
+assert.ok(!hintFor('clean', 1).includes('clean'));
+assert.ok(!hintFor('clean', 2).includes('clean'));
+assert.equal(reviewDate(0, new Date('2026-11-16T00:00:00Z')), '2026-11-17T00:00:00.000Z');
+assert.equal(reviewDate(4, new Date('2026-11-16T00:00:00Z')), '2026-12-16T00:00:00.000Z');
+const words = ['clean','feel','ground'].map(word => ({word, translation:'', definitionEn:'',definitionCn:'',sentenceEn:'',sentenceCn:''}));
+const records = [{unit:'test',word:'ground',nextReview:'2026-11-15T00:00:00Z'}] as any;
+assert.equal(buildLesson(words,records,'test',new Date('2026-11-16'))[0].word,'ground');
+assert.equal(buildLesson(words,records,'other',new Date('2026-11-16'))[0].word,'clean');
+console.log('Tutor checks passed: normalization, hidden answers, review intervals, due priority and unit isolation.');

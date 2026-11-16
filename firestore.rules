@@ -1,0 +1,66 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    // --- User Profile Validation ---
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['currentSet', 'progress', 'updatedAt'])
+        && data.keys().size() == 3
+        && data.currentSet is number
+        && data.progress is map
+        && data.updatedAt == request.time;
+    }
+
+    // --- Word Stat Validation ---
+    function isValidWordStat(data) {
+      return data.keys().hasAll(['word', 'c', 't', 'updatedAt'])
+        && data.keys().size() == 4
+        && data.word is string && data.word.size() <= 200
+        && data.c is number && data.c >= 0
+        && data.t is number && data.t >= 0
+        && data.updatedAt == request.time;
+    }
+
+    // --- History Item Validation ---
+    function isValidHistoryItem(data) {
+      return data.keys().hasAll(['date', 'type', 'score', 'createdAt'])
+        && data.keys().size() == 4
+        && data.date is string && data.date.size() <= 100
+        && data.type is string && data.type.size() <= 100
+        && data.score is string && data.score.size() <= 50
+        && data.createdAt == request.time;
+    }
+
+    // --- Rules ---
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUserProfile(incoming());
+      allow update: if isOwner(userId) && isValidUserProfile(incoming());
+
+      match /wordStats/{wordId} {
+        allow list: if isOwner(userId);
+        allow get: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidWordStat(incoming());
+        allow update: if isOwner(userId) && isValidWordStat(incoming());
+        allow delete: if isOwner(userId);
+      }
+
+      match /history/{historyId} {
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidHistoryItem(incoming());
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}

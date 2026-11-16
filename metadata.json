@@ -1,0 +1,6 @@
+{
+  "name": "Vocabulary Master",
+  "description": "A comprehensive English vocabulary testing app featuring fill-in-the-blank exercises, pronunciation, and detailed word information.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

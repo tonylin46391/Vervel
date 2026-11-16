@@ -1,0 +1,57 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Stores user preferences and current progress across devices.",
+      "type": "object",
+      "properties": {
+        "currentSet": { "type": "number", "description": "The ID of the vocabulary set currently being studied." },
+        "progress": { 
+          "type": "object", 
+          "description": "Mapping of set ID to current progress within that set.",
+          "properties": {
+            "batchStartIndex": { "type": "number" },
+            "currentIndex": { "type": "number" }
+          }
+        },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "WordStat": {
+      "title": "Word Statistics",
+      "description": "Performance tracking for a specific word.",
+      "type": "object",
+      "properties": {
+        "word": { "type": "string" },
+        "c": { "type": "number", "description": "Correct count" },
+        "t": { "type": "number", "description": "Total attempts" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "HistoryItem": {
+      "title": "History Item",
+      "description": "History of completed batches.",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string" },
+        "type": { "type": "string" },
+        "score": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile and global progress."
+    },
+    "/users/{userId}/wordStats/{wordId}": {
+      "schema": "WordStat",
+      "description": "Individual word performance statistics."
+    },
+    "/users/{userId}/history/{historyId}": {
+      "schema": "HistoryItem",
+      "description": "Session history log."
+    }
+  }
+}
